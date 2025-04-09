@@ -38,7 +38,7 @@ function Home() {
                     return;
                 }
 
-                // Handle regular chat messages
+                // Handle reallSocketsgular chat messages
                 setMessages((prev) => [...prev, { 
                     text: parsedMessage.type ? parsedMessage.payload.message : event.data, 
                     type: 'received' 
@@ -85,6 +85,39 @@ function Home() {
         }
     };
 
+    const handleSummary = async () => {
+        try {
+            const res = await fetch("https://chatsphere-backend-8wxp.onrender.com/summarize");
+            const data = await res.json();
+    
+            if (!data.summary) {
+                alert("No summary received.");
+                return;
+            }
+    
+            const rawSummary = data.summary.replace(/[*_`~]/g, "");
+    
+            // Send the summary message to all users in the room via WebSocket
+            if (wsRef.current) {
+                wsRef.current.send(JSON.stringify({
+                    type: "chat",
+                    payload: {
+                        roomId: roomCode,
+                        message: `[Summary]: ${rawSummary}`
+                    }
+                }));
+    
+                // Also show the summary message in the sender's own chat view
+                setMessages((prev) => [...prev, { text: `[Summary]: ${rawSummary}`, type: 'sent' }]);
+            }
+    
+        } catch (err) {
+            console.error("Failed to summarize chat:", err);
+            alert("Failed to fetch summary.");
+        }
+    };
+    
+
     return (
         <div className="h-screen w-screen bg-black flex items-center justify-center">
             <div className="w-200 h-180 bg-[#121212] text-white rounded-lg shadow-lg p-4">
@@ -102,6 +135,7 @@ function Home() {
                 {/* Room Info */}
                 <div className="bg-gray-800 p-2 rounded-md flex justify-between items-center text-sm">
                     <span>Room Code: <b className="text-blue-400">{roomCode}</b></span>
+                    <button onClick={handleSummary} className="border-1 border-white px-2 py-2 rounded-md font-bold">Summarize Chat</button>
                     <span>Active Members: {userCount}</span>
                 </div>
 
