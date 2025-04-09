@@ -18,7 +18,7 @@ function Home() {
 
     // Establish WebSocket connection
     useEffect(() => {
-        const ws = new WebSocket("https://chatsphere-backend-8wxp.onrender.com");
+        const ws = new WebSocket("wss://chatsphere-backend-8wxp.onrender.com");
 
         ws.onopen = () => {
             console.log("Connected to WebSocket server");
