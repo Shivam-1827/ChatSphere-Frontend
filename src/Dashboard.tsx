@@ -22,7 +22,7 @@ function Dashboard() {
     }
 
     useEffect(() => {
-        const ws = new WebSocket("wss://chatsphere-backend-8wxp.onrender.com");
+        const ws = new WebSocket("wss://chatsphere-10y3.onrender.com");
         wsRef.current = ws;
         
         ws.onopen = () => console.log("Connected to server");
