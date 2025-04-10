@@ -15,10 +15,14 @@ function Home() {
     const [message, setMessage] = useState("");
     const [userCount, setUserCount] = useState(1);
     const wsRef = useRef<WebSocket | null>(null);
+    
+    // Updated backend URL
+    const backendUrl = "https://chatsphere-10y3.onrender.com";
+    const wsUrl = backendUrl.replace("https://", "wss://");
 
     // Establish WebSocket connection
     useEffect(() => {
-        const ws = new WebSocket("wss://chatsphere-backend-8wxp.onrender.com");
+        const ws = new WebSocket(wsUrl);
 
         ws.onopen = () => {
             console.log("Connected to WebSocket server");
@@ -38,7 +42,7 @@ function Home() {
                     return;
                 }
 
-                // Handle reallSocketsgular chat messages
+                // Handle regular chat messages
                 setMessages((prev) => [...prev, { 
                     text: parsedMessage.type ? parsedMessage.payload.message : event.data, 
                     type: 'received' 
@@ -52,12 +56,16 @@ function Home() {
             }
         };
 
+        ws.onerror = (error) => {
+            console.error("WebSocket error:", error);
+        };
+
         wsRef.current = ws;
 
         return () => {
             if (ws) ws.close();
         };
-    }, [roomCode]);
+    }, [roomCode, wsUrl]);
 
     // Auto-scroll to latest message
     useEffect(() => {
@@ -87,7 +95,7 @@ function Home() {
 
     const handleSummary = async () => {
         try {
-            const res = await fetch("https://chatsphere-backend-8wxp.onrender.com/summarize");
+            const res = await fetch(`${backendUrl}/summarize`);
             const data = await res.json();
     
             if (!data.summary) {
